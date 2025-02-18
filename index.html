@@ -72,6 +72,7 @@
                     <img src="${gift.img}" alt="${gift.name}">
                     <p><a href="${gift.link}" target="_blank">${gift.name}</a></p>
                     <button id="${gift.id}" onclick="reserveGift('${gift.id}')">Rezervovat</button>
+                    <button id="cancel-${gift.id}" style="display:none;" onclick="cancelReservation('${gift.id}')">Zrušit rezervaci</button>
                 `;
 
                 container.appendChild(giftDiv);
@@ -81,11 +82,14 @@
             db.ref("gifts").on("value", snapshot => {
                 snapshot.forEach(childSnapshot => {
                     const id = childSnapshot.key;
-                    const button = document.getElementById(id);
-                    if (button) {
-                        button.classList.add("reserved");
-                        button.innerText = "Rezervováno";
-                        button.disabled = true;
+                    const reserveButton = document.getElementById(id);
+                    const cancelButton = document.getElementById("cancel-" + id);
+
+                    if (reserveButton && cancelButton) {
+                        reserveButton.classList.add("reserved");
+                        reserveButton.innerText = "Rezervováno";
+                        reserveButton.disabled = true;
+                        cancelButton.style.display = "inline-block";
                     }
                 });
             }, error => {
@@ -101,6 +105,17 @@
                 console.log("Dárek rezervován:", id);
             }).catch(error => {
                 console.error("Chyba při rezervaci:", error);
+            });
+        }
+
+        // Funkce pro zrušení rezervace
+        function cancelReservation(id) {
+            console.log("Zrušuji rezervaci pro dárek:", id);
+            const giftRef = db.ref("gifts/" + id);
+            giftRef.remove().then(() => {
+                console.log("Rezervace zrušena:", id);
+            }).catch(error => {
+                console.error("Chyba při zrušení rezervace:", error);
             });
         }
 
