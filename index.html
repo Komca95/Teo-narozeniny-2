@@ -223,4 +223,20 @@
             const giftIds = ['gift1', 'gift2', 'gift3', 'gift4', 'gift5', 'gift6', 'gift7', 'gift8', 'gift9', 'gift10', 'gift11'];
             giftIds.forEach((giftId) => {
                 const button = document.getElementById('button-' + giftId);
-               
+                const giftRef = database.ref('reservations/' + giftId);
+
+                giftRef.once('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        button.innerText = 'Zrušit rezervaci';
+                        button.classList.add('reserved');
+                    } else {
+                        button.innerText = 'Rezervovat';
+                        button.classList.remove('reserved');
+                    }
+                });
+            });
+        };
+    </script>
+
+</body>
+</html>
