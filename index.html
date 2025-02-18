@@ -7,86 +7,123 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <style>
-        /* ... tvůj CSS kód zůstává stejný ... */
+        .gift-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .gift {
+            text-align: center;
+            width: 200px;
+        }
+
+        .reserve-btn {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .reserve-btn.reserved {
+            background-color: #f44336;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 <body>
 
-    <h1>Teouškovy narozeniny</h1>
+<h1>Teouškovy narozeniny</h1>
 
-    <div class="gift-container">
-        <!-- Dárky zůstávají stejné, přidám jen tlačítka a zbytek kódu pro tlačítka -->
-        <div class="gift" id="gift1">
-            <h2>Batůžek</h2>
-            <a href="https://www.ondalek.cz/lassig-tiny-backpack-about-friends-detsky-batoh-racoon/?utm_source=google&utm_medium=cpc&utm_campaign=PLA_PMAX-Zombie&utm_id=21590565831&gad_source=1&gclid=Cj0KCQiA4rK8BhD7ARIsAFe5LXIyae2Y59qgidxaXe-Q0On_OlIz386H8rrXsifd5TcZ1qoBcjdGxZkaAm4tEALw_wcB" target="_blank">
-                <img src="https://i.imgur.com/dMBOStj.png" alt="Batůžek">
-            </a>
-            <button class="reserve-btn" onclick="toggleReservation('gift1')" id="button-gift1">Rezervovat</button>
-        </div>
-        <!-- Opakujte to pro ostatní dárky... -->
+<div class="gift-container">
+    <!-- Dárky, zde přidáváme tlačítka a odkazy -->
+    <div class="gift" id="gift1">
+        <h2>Batůžek</h2>
+        <a href="https://www.ondalek.cz/lassig-tiny-backpack-about-friends-detsky-batoh-racoon/?utm_source=google&utm_medium=cpc&utm_campaign=PLA_PMAX-Zombie&utm_id=21590565831&gad_source=1&gclid=Cj0KCQiA4rK8BhD7ARIsAFe5LXIyae2Y59qgidxaXe-Q0On_OlIz386H8rrXsifd5TcZ1qoBcjdGxZkaAm4tEALw_wcB" target="_blank">
+            <img src="https://i.imgur.com/dMBOStj.png" alt="Batůžek">
+        </a>
+        <button class="reserve-btn" onclick="toggleReservation('gift1')" id="button-gift1">Rezervovat</button>
     </div>
+    <!-- Opakujeme pro ostatní dárky -->
+    <div class="gift" id="gift2">
+        <h2>Knížka</h2>
+        <a href="https://www.nejlepsi-darecky.cz/textilni-vzdelavaci-knizka?gad_source=1&gclid=Cj0KCQiAy8K8BhCZARIsAKJ8sfTKJOm_2AB1k7YwyM0fWUNHCZZIiCRiqPD6T76Lq3qNRCjDRLozJ3IaAtMrEALw_wcB" target="_blank">
+            <img src="https://i.imgur.com/PYLRREc.png" alt="Knížka">
+        </a>
+        <button class="reserve-btn" onclick="toggleReservation('gift2')" id="button-gift2">Rezervovat</button>
+    </div>
+    <!-- Pokračuj s dalšími dárky podle potřeby -->
+</div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAkLOermaWcOv5d656EDPQETjoOGmERKtw",
-            authDomain: "teo-narozeniny-52be7.firebaseapp.com",
-            databaseURL: "https://teo-narozeniny-52be7-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "teo-narozeniny-52be7",
-            storageBucket: "teo-narozeniny-52be7.firebasestorage.app",
-            messagingSenderId: "795054861137",
-            appId: "1:795054861137:web:9cd782b6f1b623d3e8170",
-            measurementId: "G-0GRPTFLG4M"
-        };
+<script>
+// Firebase konfigurace
+const firebaseConfig = {
+    apiKey: "AIzaSyAkLOermaWcOv5d656EDPQETjoOGmERKtw",
+    authDomain: "teo-narozeniny-52be7.firebaseapp.com",
+    databaseURL: "https://teo-narozeniny-52be7-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "teo-narozeniny-52be7",
+    storageBucket: "teo-narozeniny-52be7.firebasestorage.app",
+    messagingSenderId: "795054861137",
+    appId: "1:795054861137:web:9cd782b6f1b623d3e8170",
+    measurementId: "G-0GRPTFLG4M"
+};
 
-        // Inicializace Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database(app);
+// Inicializace Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
 
-        // Funkce pro rezervaci/zrušení rezervace
-        function toggleReservation(giftId) {
-            const button = document.getElementById("button-" + giftId);
-            const giftRef = database.ref('reservations/' + giftId);
+// Funkce pro rezervaci/zrušení rezervace
+function toggleReservation(giftId) {
+    const button = document.getElementById("button-" + giftId);
+    const giftRef = database.ref('reservations/' + giftId);
 
-            giftRef.get().then((snapshot) => {
-                if (snapshot.exists()) {
-                    // Pokud je již rezervováno, zrušíme rezervaci
-                    giftRef.remove().then(() => {
-                        button.innerText = 'Rezervovat';
-                        button.classList.remove('reserved');
-                    });
-                } else {
-                    // Pokud není rezervováno, vytvoříme rezervaci
-                    giftRef.set(true).then(() => {
-                        button.innerText = 'Zrušit rezervaci';
-                        button.classList.add('reserved');
-                    });
-                }
-            }).catch((error) => {
-                console.error("Chyba při komunikaci s Firebase:", error);
+    giftRef.get().then((snapshot) => {
+        if (snapshot.exists()) {
+            // Pokud je již rezervováno, zrušíme rezervaci
+            giftRef.remove().then(() => {
+                button.innerText = 'Rezervovat';
+                button.classList.remove('reserved');
+            });
+        } else {
+            // Pokud není rezervováno, vytvoříme rezervaci
+            giftRef.set(true).then(() => {
+                button.innerText = 'Zrušit rezervaci';
+                button.classList.add('reserved');
             });
         }
+    }).catch((error) => {
+        console.error("Chyba při komunikaci s Firebase:", error);
+    });
+}
 
-        // Po načtení stránky zkontrolujeme, zda jsou dárky rezervované
-        window.onload = function() {
-            const gifts = ["gift1", "gift2", "gift3", "gift4", "gift5", "gift6", "gift7", "gift8", "gift9", "gift10", "gift11"];
-            gifts.forEach((giftId) => {
-                const button = document.getElementById("button-" + giftId);
-                const giftRef = database.ref('reservations/' + giftId);
+// Po načtení stránky zkontrolujeme, zda jsou dárky rezervované
+window.onload = function() {
+    const gifts = ["gift1", "gift2"];
+    gifts.forEach((giftId) => {
+        const button = document.getElementById("button-" + giftId);
+        const giftRef = database.ref('reservations/' + giftId);
 
-                giftRef.get().then((snapshot) => {
-                    if (snapshot.exists()) {
-                        button.innerText = 'Zrušit rezervaci';
-                        button.classList.add('reserved');
-                    } else {
-                        button.innerText = 'Rezervovat';
-                        button.classList.remove('reserved');
-                    }
-                }).catch((error) => {
-                    console.error("Chyba při načítání stavu rezervace:", error);
-                });
-            });
-        };
-    </script>
+        giftRef.get().then((snapshot) => {
+            if (snapshot.exists()) {
+                button.innerText = 'Zrušit rezervaci';
+                button.classList.add('reserved');
+            } else {
+                button.innerText = 'Rezervovat';
+                button.classList.remove('reserved');
+            }
+        }).catch((error) => {
+            console.error("Chyba při načítání stavu rezervace:", error);
+        });
+    });
+};
+</script>
 
 </body>
 </html>
