@@ -1,5 +1,5 @@
 <script>
-    // Firebase konfigurace (opravila jsem chybný zápis!)
+    // Firebase konfigurace
     const firebaseConfig = {
         apiKey: "AIzaSyAkLOermaWcOv5d656EDPQETjoOGmERKtw",
         authDomain: "teo-narozeniny-52be7.firebaseapp.com",
@@ -15,16 +15,31 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // Rezervace dárku
     function reserveGift(id) {
-        const giftRef = db.ref('gifts/' + id);
-        giftRef.set(true);
+        const button = document.getElementById(id);
+        if (button.classList.contains('reserved')) {
+            return; // Pokud už je rezervováno, neprováděj nic
+        }
+
+        db.ref('gifts/' + id).set(true, function(error) {
+            if (error) {
+                alert("Chyba při rezervaci!");
+            } else {
+                button.classList.add('reserved');
+                button.innerText = 'Rezervováno';
+                button.disabled = true;
+            }
+        });
     }
 
+    // Aktualizace tlačítek podle stavu rezervace
     function updateGiftStatus(snapshot) {
         snapshot.forEach(childSnapshot => {
             const id = childSnapshot.key;
+            const reserved = childSnapshot.val();
             const button = document.getElementById(id);
-            if (button) {
+            if (button && reserved) {
                 button.classList.add('reserved');
                 button.innerText = 'Rezervováno';
                 button.disabled = true;
