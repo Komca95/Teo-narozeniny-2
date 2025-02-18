@@ -10,17 +10,22 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        .gift { display: inline-block; margin: 20px; padding: 20px; border: 1px solid #ccc; border-radius: 10px; width: 250px; }
-        .gift img { width: 100%; height: auto; }
-        .gift button { padding: 10px; margin-top: 10px; cursor: pointer; }
-        .reserved { background-color: gray; cursor: not-allowed; }
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f9f9f9; color: #333; }
+        h1 { color: #f94e6d; font-size: 36px; margin-top: 20px; }
+        .gift { display: inline-block; margin: 20px; padding: 20px; border: 2px solid #f94e6d; border-radius: 15px; width: 280px; background-color: #fff; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; }
+        .gift img { width: 100%; height: auto; border-radius: 10px; }
+        .gift p { font-size: 18px; margin-top: 10px; font-weight: bold; color: #555; }
+        .gift button { padding: 12px; margin-top: 10px; cursor: pointer; background-color: #f94e6d; color: white; border: none; border-radius: 5px; font-size: 16px; transition: background-color 0.3s; }
+        .gift button:hover { background-color: #e04459; }
+        .reserved { background-color: #ccc; cursor: not-allowed; }
+        .reserved:hover { background-color: #ccc; }
+        .container { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 30px; }
     </style>
 </head>
 <body>
     <h1>Teouškovy narozeniny</h1>
 
-    <div id="gifts-container"></div>
+    <div class="container" id="gifts-container"></div>
 
     <script>
         // Firebase konfigurace
@@ -64,6 +69,7 @@
                     <img src="${gift.img}" alt="${gift.name}">
                     <p><a href="${gift.link}" target="_blank">${gift.name}</a></p>
                     <button id="${gift.id}" onclick="reserveGift('${gift.id}')">Rezervovat</button>
+                    <button id="cancel-${gift.id}" onclick="cancelReservation('${gift.id}')" style="display:none;">Zrušit rezervaci</button>
                 `;
 
                 container.appendChild(giftDiv);
@@ -71,14 +77,15 @@
 
             // Zkontrolovat stav rezervací z Firebase
             db.ref("gifts").on("value", snapshot => {
-                console.log("Získaná data z Firebase:", snapshot.val());
                 snapshot.forEach(childSnapshot => {
                     const id = childSnapshot.key;
-                    const button = document.getElementById(id);
-                    if (button) {
-                        button.classList.add("reserved");
-                        button.innerText = "Rezervováno";
-                        button.disabled = true;
+                    const buttonReserve = document.getElementById(id);
+                    const buttonCancel = document.getElementById("cancel-" + id);
+                    if (buttonReserve) {
+                        buttonReserve.classList.add("reserved");
+                        buttonReserve.innerText = "Rezervováno";
+                        buttonReserve.disabled = true;
+                        buttonCancel.style.display = "inline-block";
                     }
                 });
             }, error => {
@@ -88,12 +95,21 @@
 
         // Funkce pro rezervaci dárku
         function reserveGift(id) {
-            console.log("Rezervuji dárek:", id);
             const giftRef = db.ref("gifts/" + id);
             giftRef.set(true).then(() => {
                 console.log("Dárek rezervován:", id);
             }).catch(error => {
                 console.error("Chyba při rezervaci:", error);
+            });
+        }
+
+        // Funkce pro zrušení rezervace
+        function cancelReservation(id) {
+            const giftRef = db.ref("gifts/" + id);
+            giftRef.remove().then(() => {
+                console.log("Rezervace zrušena:", id);
+            }).catch(error => {
+                console.error("Chyba při zrušení rezervace:", error);
             });
         }
 
