@@ -13,7 +13,18 @@
         .gift button { padding: 10px; margin-top: 10px; cursor: pointer; }
         .reserved { background-color: gray; cursor: not-allowed; }
     </style>
+</head>
+<body>
+    <h1>Teouškovy narozeniny</h1>
+    
+    <div class="gift">
+        <img src="https://i.imgur.com/dMBOStj.png" alt="Batůžek">
+        <p><a href="https://www.ondalek.cz/lassig-tiny-backpack-about-friends-detsky-batoh-racoon/" target="_blank">Batůžek</a></p>
+        <button id="gift1" onclick="reserveGift('gift1')">Rezervovat</button>
+    </div>
+
     <script>
+        // Firebase konfigurace
         const firebaseConfig = {
             apiKey: "AIzaSyAkLOermaWcOv5d656EDPQETjoOGmERKtw",
             authDomain: "teo-narozeniny-52be7.firebaseapp.com",
@@ -25,14 +36,24 @@
             measurementId: "G-0GRPTFLG4M"
         };
 
+        // Inicializace Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // Funkce pro rezervaci dárku
         function reserveGift(id) {
             const giftRef = db.ref('gifts/' + id);
-            giftRef.set(true);
+            giftRef.set(true).then(() => {
+                console.log("Rezervace proběhla úspěšně!");
+                document.getElementById(id).classList.add('reserved');
+                document.getElementById(id).innerText = 'Rezervováno';
+                document.getElementById(id).disabled = true;
+            }).catch(error => {
+                console.error("Chyba při rezervaci:", error);
+            });
         }
 
+        // Aktualizace statusu dárků
         function updateGiftStatus(snapshot) {
             snapshot.forEach(childSnapshot => {
                 const id = childSnapshot.key;
@@ -45,17 +66,10 @@
             });
         }
 
+        // Načtení statusu dárků při načtení stránky
         window.onload = function() {
             db.ref('gifts').on('value', updateGiftStatus);
         }
     </script>
-</head>
-<body>
-    <h1>Teouškovy narozeniny</h1>
-    <div class="gift">
-        <img src="https://i.imgur.com/dMBOStj.png" alt="Batůžek">
-        <p><a href="https://www.ondalek.cz/lassig-tiny-backpack-about-friends-detsky-batoh-racoon/" target="_blank">Batůžek</a></p>
-        <button id="gift1" onclick="reserveGift('gift1')">Rezervovat</button>
-    </div>
 </body>
 </html>
